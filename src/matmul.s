@@ -31,15 +31,19 @@ matmul:
     bge x0, a5, error_m1
     bne a2, a4, error_match
     # Prologue
-    addi sp, sp, -32
-    sw s0, 0(sp)
-    sw s1, 4(sp)
-    sw s2, 8(sp)
-    sw s3, 12(sp)
-    sw s4, 16(sp)
-    sw s5, 20(sp)
-    sw s6, 24(sp)
-    sw ra, 28(sp)
+    addi sp, sp, -44
+    sw ra, 0(sp)
+    sw s0, 4(sp)
+    sw s1, 8(sp)
+    sw s2, 12(sp)
+    sw s3, 16(sp)
+    sw s4, 20(sp)
+    sw s5, 24(sp)
+    sw s6, 28(sp)
+    sw s7, 32(sp)
+    sw s8, 36(sp)
+    sw s9, 40(sp)
+
     mv s0, a0
     mv s1, a1
     mv s2, a2
@@ -47,40 +51,35 @@ matmul:
     mv s4, a4
     mv s5, a5
     mv s6, a6
-    add t0, x0, x0 #i
-    add t1, x0, x0 #j
+    add s7, x0, x0 #i
+    add s8, x0, x0 #j
 outer_loop_start:
-    bge t0, s1, outer_loop_end
-    slli t2, t0, 2
-    mul t2, t2, s2
+    bge s7, s1, outer_loop_end
 inner_loop_start:
-    bge t1, s2, inner_loop_end
-    slli t3, t1, 2
-    addi sp, sp, -12
-    sw t0, 0(sp)
-    sw t1, 4(sp)
-    sw t2, 8(sp)
-    add a0, s0, t2  
-    add a1, s3, t3
-    mv a2 s2
+    bge s8, s5, inner_loop_end
+    
+    mul t0, s7, s2
+    slli t0, t0, 2
+    add a0, s0, t0
+    slli t0, s8, 2
+    add a1, s3, t0
+    mv a2, s2
     addi a3, x0, 1
     mv a4, s5
     jal dot
-    lw t0, 0(sp)
-    lw t1, 4(sp)
-    lw t2, 8(sp)
-    addi sp, sp, 12
     
-    slli t3, t1, 2
-    add t4, t2, t3 #offset
-    add t5, s6, t4
-    sw a0, 0(t5)
+    slli t0, s7, 2
+    mul t1, t0, s5
+    slli t0, s8, 2
+    add t1, t1, t0
+    add t1, t1, s6 
+    sw a0, 0(t1)
 
-    addi t1, t1, 1
+    addi s8, s8, 1
     j inner_loop_start
 inner_loop_end:
-    addi t0, t0, 1
-    addi t1, x0, 0
+    addi s7, s7, 1
+    addi s8, x0, 0
     j outer_loop_start
 error_m0:
     addi a0, x0, 17
@@ -96,13 +95,16 @@ error_match:
     ecall
 outer_loop_end:
     # Epilogue
-    lw s0, 0(sp)
-    lw s1, 4(sp)
-    lw s2, 8(sp)
-    lw s3, 12(sp)
-    lw s4, 16(sp)
-    lw s5, 20(sp)
-    lw s6, 24(sp)
-    lw ra, 28(sp)
-    addi sp, sp, 32
+    lw ra, 0(sp)
+    lw s0, 4(sp)
+    lw s1, 8(sp)
+    lw s2, 12(sp)
+    lw s3, 16(sp)
+    lw s4, 20(sp)
+    lw s5, 24(sp)
+    lw s6, 28(sp)
+    lw s7, 32(sp)
+    lw s8, 36(sp)
+    lw s9, 40(sp)
+    addi sp, sp, 44
     ret
